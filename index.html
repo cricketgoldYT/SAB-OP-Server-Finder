@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roblox Server Links</title>
+  <style>
+    :root {
+      --bg: #0f0f10;
+      --card: #1a1a1c;
+      --text: #e5e5e5;
+      --accent: #FFD700; /* Gold accent */
+      --accent-hover: #FFC400; /* Slightly darker gold */
+      --selected: #FFD700; /* Selected button uses gold */
+      --accent-text: #000000; /* Black text on gold */
+    }
+
+    body {
+      font-family: "Poppins", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    h1 {
+      margin-bottom: 30px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      opacity: 0;
+      animation: fadeIn 1s ease forwards;
+    }
+
+    .button-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: var(--card);
+      padding: 30px 40px;
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
+      opacity: 0;
+      animation: fadeInUp 1.2s ease forwards;
+      animation-delay: 0.5s;
+    }
+
+    .server-btn {
+      background: var(--card);
+      color: var(--text);
+      border: 2px solid var(--accent);
+      border-radius: 8px;
+      padding: 12px 20px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.1s ease, border 0.2s, color 0.2s;
+      font-family: "Poppins", Arial, sans-serif;
+    }
+
+    .server-btn:hover {
+      background: var(--accent-hover);
+      color: var(--accent-text); /* black text on gold */
+      transform: translateY(-2px);
+    }
+
+    .server-btn.selected {
+      background: var(--selected);
+      border-color: var(--accent-hover);
+      color: var(--accent-text); /* black text */
+    }
+
+    .server-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    #status-text {
+      margin-top: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      min-height: 20px;
+      font-family: "Poppins", Arial, sans-serif;
+    }
+
+    #progress-container {
+      width: 80%;
+      max-width: 400px;
+      background: #333;
+      border-radius: 8px;
+      margin-top: 10px;
+      height: 18px;
+      overflow: hidden;
+      display: none;
+      position: relative;
+    }
+
+    #progress-bar {
+      width: 0%;
+      height: 100%;
+      background: var(--accent);
+      transition: width 0.1s ease;
+    }
+
+    #progress-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent-text); /* black text */
+      pointer-events: none;
+      font-family: "Poppins", Arial, sans-serif;
+    }
+
+    #join-btn {
+      background: var(--accent);
+      color: var(--accent-text); /* black text on gold */
+      border: none;
+      border-radius: 8px;
+      padding: 14px 28px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 25px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease, transform 0.1s ease;
+      font-family: "Poppins", Arial, sans-serif;
+    }
+
+    #join-btn.active:hover {
+      background: var(--accent-hover);
+    }
+
+    #join-btn.active {
+      opacity: 1;
+      pointer-events: all;
+      animation: fadeIn 0.5s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <h1>Choose a Server</h1>
+
+  <div class="button-container">
+    <button class="server-btn" onclick="selectServer(this, 1.2)">Strawberry Elephant (May Take Longer)</button>
+    <button class="server-btn" onclick="selectServer(this, 1.1)">67</button>
+    <button class="server-btn" onclick="selectServer(this, 1.0)">La Grande Combinasion</button>
+    <button class="server-btn" onclick="selectServer(this, 0.9)">Dragon Cannelloni</button>
+    <button class="server-btn" onclick="selectServer(this, 0.8)">Esok Sekolah</button>
+    <button class="server-btn" onclick="selectServer(this, 0.7)">Garama and Madundung</button>
+  </div>
+
+  <div id="status-text"></div>
+
+  <div id="progress-container">
+    <div id="progress-bar"></div>
+    <span id="progress-text">0%</span>
+  </div>
+
+  <button id="join-btn" onclick="joinServer()">Join Server</button>
+
+  <script>
+    let selectedServer = null;
+    let progress = 0;
+    let loading = false;
+
+    const buttons = document.querySelectorAll('.server-btn');
+
+    function selectServer(button, speedFactor) {
+      if (loading) return;
+
+      // Disable all buttons while loading
+      buttons.forEach(btn => btn.disabled = true);
+
+      buttons.forEach(btn => btn.classList.remove('selected'));
+      button.classList.add('selected');
+      selectedServer = button.textContent;
+      startProgress(speedFactor);
+    }
+
+    function startProgress(speedFactor) {
+      progress = 0;
+      loading = true;
+      const progressContainer = document.getElementById('progress-container');
+      const progressBar = document.getElementById('progress-bar');
+      const progressText = document.getElementById('progress-text');
+      const joinBtn = document.getElementById('join-btn');
+      const statusText = document.getElementById('status-text');
+
+      joinBtn.classList.remove('active');
+      progressContainer.style.display = 'block';
+      progressBar.style.width = '0%';
+      progressText.textContent = '0%';
+      statusText.textContent = 'Scanning servers...';
+
+      const interval = setInterval(() => {
+        let increment = Math.random() * 5 * speedFactor;
+        if (progress < 30) increment *= 0.4;
+        else if (progress < 60) increment *= 0.7;
+        else if (progress < 85) increment *= 0.9;
+        else increment *= 0.5;
+
+        progress += increment;
+
+        // Update status text
+        if (progress < 34) statusText.textContent = 'Scanning servers...';
+        else if (progress < 90) statusText.textContent = 'Filtering servers...';
+        else statusText.textContent = 'Found server!';
+
+        if (progress >= 100) {
+          progress = 100;
+          clearInterval(interval);
+          loading = false;
+          joinBtn.classList.add('active');
+          statusText.textContent = 'Found server!';
+
+          // Re-enable buttons after loading
+          buttons.forEach(btn => btn.disabled = false);
+        }
+
+        progressBar.style.width = progress + '%';
+        progressText.textContent = Math.floor(progress) + '%';
+      }, 150);
+    }
+
+    function joinServer() {
+      if (selectedServer && !loading) {
+        window.open('https://www.roblox.com/share?code=639f15670d755e44a7bf9137e0a13642&type=Server', '_blank');
+      }
+    }
+  </script>
+</body>
+</html>
